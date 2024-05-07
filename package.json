@@ -4,7 +4,8 @@
   "description": "A movie management app powered by Node.js, Express, MongoDB/PostgreSQL, Auth0, and Cloudinary. Organize your collection, get personalized recommendations, and dive into backend development.  Made with love at @assembler-institute",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --watch src/**/*.ts --exec ts-node src/index.ts"
   },
   "keywords": [],
   "author": "",
