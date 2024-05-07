@@ -1,0 +1,23 @@
+{
+  "name": "screen-sorcerer-api",
+  "version": "1.0.0",
+  "description": "A movie management app powered by Node.js, Express, MongoDB/PostgreSQL, Auth0, and Cloudinary. Organize your collection, get personalized recommendations, and dive into backend development.  Made with love at @assembler-institute",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.10",
+    "dotenv": "^16.4.5",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
