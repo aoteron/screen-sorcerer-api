@@ -6,10 +6,15 @@ type TConfig = {
 
 type EnvironmentConfig = {
   app: AppConfig
+  db: DbConfig
 }
 
 type AppConfig = {
   PORT: string | number
+}
+
+type DbConfig = {
+  URI: string
 }
 
 if (process.env.NODE_ENV === 'production') {
@@ -25,10 +30,16 @@ const CONFIG: TConfig = {
     app: {
       PORT: process.env.PORT || 4004,
     },
+    db: {
+      URI: process.env.MONGODB_URI || 'mongodb://localhost:27017',
+    },
   },
   production: {
     app: {
       PORT: process.env.PORT || 8008,
+    },
+    db: {
+      URI: process.env.MONGODB_URI || 'mongodb://localhost:27017',
     },
   },
 }
