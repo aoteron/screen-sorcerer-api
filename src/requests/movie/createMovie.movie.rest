@@ -3,5 +3,6 @@ Content-Type: application/json
 
 {
     "name": "Rick & Morty",
-    "image": "urlexample"
+    "image": "urlexample",
+    "score": 7
 }
