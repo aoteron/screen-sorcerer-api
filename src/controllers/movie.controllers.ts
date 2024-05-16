@@ -49,7 +49,7 @@ export const deleteMovie = async (req:Request, res:Response) => {
     const { movieId } = req.params
 
     try {
-        const movieDeleted = await MovieModel.findByIdAndDelete(
+        await MovieModel.findByIdAndDelete(
             { _id: movieId }
         )
         res.status(200).send('Movie deleted')
