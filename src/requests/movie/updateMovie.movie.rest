@@ -1,0 +1,6 @@
+PATCH  http://localhost:4000/movie/6646011e65e512552e3f4ff8
+Content-Type: application/json
+
+{
+    "name": "Gladiator"
+}
