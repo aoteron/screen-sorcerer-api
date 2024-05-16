@@ -1,1 +1,6 @@
-PATCH  http://localhost:4000/user/:userId
+PATCH  http://localhost:4000/user/6645ead68c84993d3e632662
+Content-Type: application/json
+
+{
+    "name": "Víctor"
+}
