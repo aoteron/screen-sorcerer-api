@@ -1,0 +1,6 @@
+PATCH  http://localhost:4000/genre/66462da6a4df55e4fa287a01
+Content-Type: application/json
+
+{
+    "name": "Science Fiction"
+}
