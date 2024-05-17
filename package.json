@@ -15,8 +15,10 @@
   "author": "aoteron",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.14.0",
     "express": "^4.19.2",
-    "mongoose": "^8.3.4"
+    "mongoose": "^8.3.4",
+    "prisma": "^5.14.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

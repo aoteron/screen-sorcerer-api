@@ -5,4 +5,3 @@ Content-Type: application/json
     "name": "Sci-Fi"
 }
 
-// Example userId (Jose): 66460ba07a2f44ed918f8bd5
