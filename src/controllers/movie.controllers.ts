@@ -1,10 +1,9 @@
 import { Request, Response } from 'express'
-import MovieModel from '../models/movie.model'
-import UserModel from '../models/user.model'
+import prisma from '../db/client'
 
 export const getAllMovies = async (req: Request, res: Response) => {
   try {
-    const allMovies = await MovieModel.find().populate('createdBy', 'name')
+    const allMovies = await prisma.movie.findMany()
     res.status(201).send(allMovies)
   } catch (error) {
     res.status(400).send(error)
@@ -12,30 +11,50 @@ export const getAllMovies = async (req: Request, res: Response) => {
 }
 
 export const createMovie = async (req: Request, res: Response) => {
-  const { name, image, score, genre, synopsis } = req.body
+  const { name, image, score, synopsis, genresIDs } = req.body
   const { userId } = req.params
-  const createdBy = req.params.userId
 
   try {
-    const movie = await MovieModel.create({ name, image, score, genre, synopsis, createdBy })
-    await UserModel.findByIdAndUpdate({ _id: userId }, { $push: { movies: movie.id } })
-
-    res.status(201).send(movie)
+    const newMovie = await prisma.movie.create({
+      data: {
+        name,
+        image,
+        score,
+        synopsis,
+        genres: {
+          connect: genresIDs.map((genreId: string) => ({ id: genreId })),
+        },
+        user: { connect: { id: userId } },
+      },
+    })
+    res.status(201).send(newMovie)
   } catch (error) {
     res.status(400).send(error)
   }
 }
 
 export const updateMovie = async (req: Request, res: Response) => {
-  const { name, image, url, score, synopsis } = req.body
+  const { name, image, score, synopsis, newGenres, deleteGenres } = req.body
   const { movieId } = req.params
 
   try {
-    const movieUpdated = await MovieModel.findByIdAndUpdate(
-      { _id: movieId },
-      { name, image, url, score, synopsis },
-      { new: true },
-    )
+    const movieUpdated = await prisma.movie.update({
+      where: { id: movieId },
+      data: {
+        name,
+        image,
+        score,
+        synopsis,
+        genres: {
+          connect: newGenres?.map((genreId: string) => ({ id: genreId })),
+          disconnect: deleteGenres?.map((genreId: string) => ({ id: genreId })),
+        },
+      },
+      include: {
+        genres: true,
+      },
+    })
+
     res.status(200).send(movieUpdated)
   } catch (error) {
     res.status(400).send(error)
@@ -44,10 +63,44 @@ export const updateMovie = async (req: Request, res: Response) => {
 
 export const deleteMovie = async (req: Request, res: Response) => {
   const { movieId } = req.params
+  const movie = await prisma.movie.findUnique({
+    where: { id: movieId },
+    include: { genres: true },
+  })
+
+  if (!movie) {
+    return res.status(404).send('Movie not found')
+  }
 
   try {
-    await MovieModel.findByIdAndDelete({ _id: movieId })
-    res.status(200).send('Movie deleted')
+    const moviesInGenre = await prisma.genre.findMany({
+      where: {
+        movies: {
+          some: {
+            id: movieId,
+          },
+        },
+      },
+    })
+
+    await Promise.all(
+      moviesInGenre.map(async (genre) => {
+        await prisma.genre.update({
+          where: { id: genre.id },
+          data: {
+            movies: {
+              disconnect: {
+                id: movieId,
+              },
+            },
+          },
+        })
+      }),
+    )
+
+    await prisma.movie.delete({ where: { id: movieId } })
+
+    res.status(200).send(`Movie successfully deleted`)
   } catch (error) {
     res.status(400).send(error)
   }

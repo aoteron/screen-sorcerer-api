@@ -1,7 +1,7 @@
-POST http://localhost:4000/genre/66460ba07a2f44ed918f8bd5
+POST http://localhost:4000/genre/6647a05f437c743695325128
 Content-Type: application/json
 
 {
-    "name": "Sci-Fi"
+    "name": "Epic"
 }
 

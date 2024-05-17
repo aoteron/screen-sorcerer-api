@@ -32,7 +32,7 @@ model Movie {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
   genresIDs String[] @db.ObjectId
   genres    Genre[]  @relation(fields: [genresIDs], references: [id])
 }

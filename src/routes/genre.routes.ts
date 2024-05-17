@@ -1,5 +1,10 @@
 import { Router } from 'express'
-import { createGenre, deleteGenre, getAllGenres, updateGenre } from '../controllers/genre.controllers'
+import {
+  createGenre,
+  deleteGenre,
+  getAllGenres,
+  updateGenre,
+} from '../controllers/genre.controllers'
 
 const genreRoutes = Router()
 
