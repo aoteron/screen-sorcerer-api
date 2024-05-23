@@ -6,13 +6,21 @@ export const getAllMovies = async (req: Request, res: Response) => {
     const allMovies = await prisma.movie.findMany()
     res.status(201).send(allMovies)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(400).send(`Sorry, there was an error. See more details: ${error}`)
   }
 }
 
 export const createMovie = async (req: Request, res: Response) => {
   const { name, image, score, synopsis, genresIDs } = req.body
   const { userId } = req.params
+
+  if (!name || !image || !score) {
+    return res.status(400).send(`Sorry, missing fields. Please add a name, image and score`)
+  }
+
+  if (!userId) {
+    return res.status(400).send(`Sorry, user was not found`)
+  }
 
   try {
     const newMovie = await prisma.movie.create({
@@ -29,13 +37,17 @@ export const createMovie = async (req: Request, res: Response) => {
     })
     res.status(201).send(newMovie)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(400).send(`There was an error creating the movie. See more details: ${error}`)
   }
 }
 
 export const updateMovie = async (req: Request, res: Response) => {
   const { name, image, score, synopsis, newGenres, deleteGenres } = req.body
   const { movieId } = req.params
+
+  if (!name && !image && !score && synopsis && newGenres && deleteGenres) {
+    return res.status(400).send(`Any change provided`)
+  }
 
   try {
     const movieUpdated = await prisma.movie.update({
@@ -57,7 +69,7 @@ export const updateMovie = async (req: Request, res: Response) => {
 
     res.status(200).send(movieUpdated)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(500).send(`Sorry, there was an error. See more details: ${error}`)
   }
 }
 
@@ -102,6 +114,6 @@ export const deleteMovie = async (req: Request, res: Response) => {
 
     res.status(200).send(`Movie successfully deleted`)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(400).send(`Sorry, there was an error. See more details: ${error}`)
   }
 }

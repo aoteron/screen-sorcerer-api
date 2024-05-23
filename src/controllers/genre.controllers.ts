@@ -6,42 +6,49 @@ export const getAllGenres = async (req: Request, res: Response) => {
     const AllGenres = await prisma.genre.findMany()
     res.status(200).send(AllGenres)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(500).send(`Internal server error: ${error}`)
   }
 }
 
 export const createGenre = async (req: Request, res: Response) => {
   const { name } = req.body
-  // const createdBy = req.params.userId
+  if (!name) {
+    return res.status(400).send('You did not write the genre name')
+  }
 
   try {
-    const newGenre = await prisma.genre.create({
-      data: {
-        name,
-      },
-    })
-    res.status(200).send(`New genre '${newGenre.name}' successfully created!`)
+    const genreExists = await prisma.genre.findFirst({where: {name:name}});
+    if (genreExists) {
+      return res.status(400).send(`${genreExists} already exists`);
+    }
+
+    const newGenre = await prisma.genre.create({data: { name }});
+    res.status(201).send(`New genre '${newGenre.name}' successfully created!`)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(500).send(`Internal server error: ${error}`)
   }
 }
 
 export const updateGenre = async (req: Request, res: Response) => {
   const { genreId } = req.params
-  const { name, movies } = req.body
+  const { name, movies } = req.body // Next feature: edit movie list when updating de genre
+
+  if (!name) {
+    return res.status(400).send(`Ups! You forgot to set a new name`)
+  }
+
+  if (!genreId) {
+    res.status(400).send(`No genreId was found`)
+  }
 
   try {
     await prisma.genre.update({
-      where: {
-        id: genreId,
-      },
-      data: {
-        name,
-      },
+      where: { id: genreId },
+      data: { name },
     })
     res.status(200).send(`Genre '${name}' successfully updated`)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(400).send(`Sorry, we could not update the genre. More details: ${error}`)
   }
 }
 
@@ -84,8 +91,8 @@ export const deleteGenre = async (req: Request, res: Response) => {
 
     await prisma.genre.delete({ where: { id: genreId } })
 
-    res.status(200).send(`Genre successfully deleted`)
+    res.status(201).send(`Genre successfully deleted`)
   } catch (error) {
-    res.status(400).send(error)
+    res.status(500).send(`Internal server error. See more details: ${error}`)
   }
 }
