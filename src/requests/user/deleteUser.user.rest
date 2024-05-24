@@ -1,4 +1,4 @@
-DELETE http://localhost:4000/user/66507d74543d86884e847ca2
+DELETE http://localhost:4000/user/6650a6f2d12a1875d05933d3
 Content-Type: application/json
 
 {

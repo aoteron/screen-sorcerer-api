@@ -47,6 +47,10 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
   const { name, email, password } = req.body
+
+  if (!name || !email || !password) {
+    return res.status(400).send('All fields are required')
+  }
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
