@@ -2,7 +2,7 @@ POST http://localhost:4000/user/
 Content-Type: application/json
 
 {
-    "name": "Joserra",
-    "email": "joserra@example.com",
+    "name": "Jose Ramón García",
+    "email": "joseramongracia@example.com",
     "password": "123456"
 }

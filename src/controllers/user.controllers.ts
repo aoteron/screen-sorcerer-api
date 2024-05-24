@@ -1,5 +1,12 @@
 import { Request, Response } from 'express'
 import prisma from '../db/client'
+import bcrypt from 'bcrypt'
+
+interface UserUpdateData {
+  name?: string;
+  email?: string;
+  password?: string;
+}
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -41,41 +48,79 @@ export const getUser = async (req: Request, res: Response) => {
 export const createUser = async (req: Request, res: Response) => {
   const { name, email, password } = req.body
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
-      data: { name, email, password },
+      data: { name, email, password: hashedPassword },
     })
-    res.status(201).send(`New user successfully created: ${newUser}`)
+    res.status(201).json(`New user successfully created`)
   } catch (error) {
     res.status(400).send(`Sorry, an unexpected error occurred. See more details: ${error}`)
   }
 }
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { name, email, password } = req.body
+  const { name, email, currentPassword, newPassword } = req.body
   const { userId } = req.params
 
-  if (!name && !email && !password) {
+  if (!name && !email && !newPassword) {
     return res.status(400).send("At least one field (name, email, password) must be provided for update");
 }
 
   try {
-    const userUpdated = await prisma.user.update({
+    const user = await prisma.user.findUnique({
+      where: {id:userId}
+    });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    if (currentPassword) {  
+      const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
+      if (!isPasswordValid) {
+        return res.status(401).send('Incorrect password')
+      }
+    }
+
+    const updateData: UserUpdateData = {};
+
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (newPassword) {
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      updateData.password = hashedNewPassword;
+    }
+
+    await prisma.user.update({
       where: { id: userId },
-      data: { name, email, password },
+      data: updateData,
     })
-    res.status(201).send(`User successfully updated: ${userUpdated}`)
+    res.status(201).send(`User successfully updated`)
   } catch (error) {
     res.status(400).send(`Sorry, an unexpected error occurred. See more details: ${error}`)
   }
 }
 
 export const deleteUser = async (req: Request, res: Response) => {
-  const { userId } = req.params
+  const { userId } = req.params;
+  const { password } = req.body;
 
   try {
+    const user = await prisma.user.findUnique({
+      where: {id: userId},
+    });
+    if (!user) {
+      return res.status(404).send(`User not found`);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+      return res.status(401).send(`Incorrect password`)
+    }
+
     await prisma.user.delete({
       where: { id: userId },
     })
+
     res.status(200).send('User deleted successfully')
   } catch (error) {
     res.status(400).send(`An error ocurred while deleting the user. See more details: ${error}`)

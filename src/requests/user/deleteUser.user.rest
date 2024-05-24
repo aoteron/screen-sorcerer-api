@@ -1,1 +1,6 @@
-DELETE http://localhost:4000/user/6647a05f437c743695325128
+DELETE http://localhost:4000/user/66507d74543d86884e847ca2
+Content-Type: application/json
+
+{
+  "password": "123456"
+}
