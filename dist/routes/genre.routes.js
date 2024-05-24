@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const genre_controllers_1 = require("../controllers/genre.controllers");
+const genreRoutes = (0, express_1.Router)();
+genreRoutes.get('/', genre_controllers_1.getAllGenres);
+genreRoutes.post('/:userId', genre_controllers_1.createGenre);
+genreRoutes.patch('/:genreId', genre_controllers_1.updateGenre);
+genreRoutes.delete('/:genreId', genre_controllers_1.deleteGenre);
+exports.default = genreRoutes;

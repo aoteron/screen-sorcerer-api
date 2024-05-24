@@ -17,12 +17,12 @@ export const createGenre = async (req: Request, res: Response) => {
   }
 
   try {
-    const genreExists = await prisma.genre.findFirst({where: {name:name}});
+    const genreExists = await prisma.genre.findFirst({ where: { name: name } })
     if (genreExists) {
-      return res.status(400).send(`${genreExists} already exists`);
+      return res.status(400).send(`${genreExists} already exists`)
     }
 
-    const newGenre = await prisma.genre.create({data: { name }});
+    const newGenre = await prisma.genre.create({ data: { name } })
     res.status(201).send(`New genre '${newGenre.name}' successfully created!`)
   } catch (error) {
     res.status(500).send(`Internal server error: ${error}`)
