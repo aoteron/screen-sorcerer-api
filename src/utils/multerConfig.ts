@@ -15,16 +15,18 @@ interface Params {
   folder: string
   format?: (req: any, file: any) => string
   public_id?: (req: any, file: any) => string
-}const storage = new CloudinaryStorage({
+}
+
+const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'uploads',
     format: async (_req: DebuggingRequest, _file: any) => 'png',
     public_id: (_req: DebuggingRequest, _file: { originalname: any }) => {
-      return `temp_${Date.now()}`;
+      return `temp_${Date.now()}`
     },
   } as unknown as Params,
-});
+})
 
 const multerUploads = multer({ storage: storage })
 

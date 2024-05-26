@@ -106,7 +106,7 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).send('Invalid password')
     }
 
-    const expiresIn = 180 // 120'' = 2'
+    const expiresIn = 1800 // 120'' = 2'
     const expirationDate = Math.floor(Date.now() / 1000) + expiresIn
 
     const token = jwt.sign(

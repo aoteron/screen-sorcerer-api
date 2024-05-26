@@ -3,6 +3,15 @@ import prisma from '../db/client'
 import mongoose from 'mongoose'
 import { renameAndUpdateMovieImage } from '../utils/cloudinaryUtils'
 
+interface RequiredFields {
+  name: string
+  score: string
+  synopsis: string
+  genre: string
+  image: string
+  userId: string
+}
+
 export const getAllMovies = async (req: Request, res: Response) => {
   try {
     const allMovies = await prisma.movie.findMany()
@@ -13,58 +22,52 @@ export const getAllMovies = async (req: Request, res: Response) => {
 }
 
 export const createMovie = async (req: Request, res: Response) => {
-  console.log('Request body:', req.body) //Debugging
-  console.log('Request file:', req.file) //Debugging
-  console.log('Request params:', req.params) // Debugging
-
-  const { name, score, synopsis, genresIDs } = req.body
-  const userId = req.params.userId
-
-  if (!name || !req.file || !score) {
-    return res.status(400).send(`Sorry, missing fields. Please add a name, image and score`)
-  }
-
-  if (!userId) {
-    console.log('Invalid userId')
-    return res.status(400).send(`Sorry, user was not found`)
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return res.status(400).send('Invalid userId')
-  }
-
   try {
-    const genrePromises = genresIDs.map(async (genreName: string) => {
-      let genre = await prisma.genre.findFirst({ where: { name: genreName } })
-      if (!genre) {
-        genre = await prisma.genre.create({ data: { name: genreName } })
-      }
-      return { id: genre.id }
-    })
+    console.log('Request body:', req.body) // Debugging
+    console.log('Request params:', req.params) // Debugging
 
-    const genres = await Promise.all(genrePromises)
+    const { name, score, synopsis, image, genre, userId } = req.body
+
+    const requiredFields: RequiredFields = { name, score, synopsis, genre, image, userId }
+    const missingFields = Object.keys(requiredFields).filter(
+      (field) => !requiredFields[field as keyof RequiredFields],
+    )
+
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields)
+      return res.status(400).send(`Sorry, missing fields: ${missingFields.join(', ')}`)
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).send('Invalid userId')
+    }
+
+    const genreData =
+      (await prisma.genre.findFirst({
+        where: { name: genre },
+      })) ||
+      (await prisma.genre.create({
+        data: { name: genre },
+      }))
 
     const newMovie = await prisma.movie.create({
       data: {
         name,
-        image: req.file.path,
+        image,
         score: parseFloat(score),
         synopsis,
         genres: {
-          connect: genres,
+          connect: { id: genreData.id },
         },
-        user: { connect: { id: userId } },
+        user: {
+          connect: { id: userId },
+        },
       },
     })
 
-    try {
-      const uploadedMovie = await renameAndUpdateMovieImage(newMovie.id, req.file.filename);
-      res.status(201).send(uploadedMovie);
-    } catch (error) {
-      res.status(500).send(error);
-    }
-    
+    res.status(201).send(newMovie)
   } catch (error) {
+    console.error('Error creating movie:', error)
     res.status(400).send(`There was an error creating the movie. See more details: ${error}`)
   }
 }
