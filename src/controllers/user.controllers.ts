@@ -111,10 +111,10 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const token = jwt.sign(
       { id: user.id, email: user.email, exp: expirationDate },
-      process.env.JWT_SECRET!
+      process.env.JWT_SECRET!,
     )
 
-    addToken(token, new Date(expirationDate * 1000)); // Store the token and its expiration date
+    addToken(token, new Date(expirationDate * 1000)) // Store the token and its expiration date
 
     res.status(200).json({
       accessToken: token,
