@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
 import prisma from '../db/client'
+import mongoose from 'mongoose'
+import { renameAndUpdateMovieImage } from '../utils/cloudinaryUtils'
 
 export const getAllMovies = async (req: Request, res: Response) => {
   try {
@@ -11,34 +13,57 @@ export const getAllMovies = async (req: Request, res: Response) => {
 }
 
 export const createMovie = async (req: Request, res: Response) => {
-  console.log('Request body:', req.body); //Debugging
-  console.log('Request file:', req.file); //Debugging
+  console.log('Request body:', req.body) //Debugging
+  console.log('Request file:', req.file) //Debugging
+  console.log('Request params:', req.params) // Debugging
 
   const { name, score, synopsis, genresIDs } = req.body
-  const { userId } = req.params
+  const userId = req.params.userId
 
   if (!name || !req.file || !score) {
     return res.status(400).send(`Sorry, missing fields. Please add a name, image and score`)
   }
 
   if (!userId) {
+    console.log('Invalid userId')
     return res.status(400).send(`Sorry, user was not found`)
   }
 
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).send('Invalid userId')
+  }
+
   try {
+    const genrePromises = genresIDs.map(async (genreName: string) => {
+      let genre = await prisma.genre.findFirst({ where: { name: genreName } })
+      if (!genre) {
+        genre = await prisma.genre.create({ data: { name: genreName } })
+      }
+      return { id: genre.id }
+    })
+
+    const genres = await Promise.all(genrePromises)
+
     const newMovie = await prisma.movie.create({
       data: {
         name,
-        image: req.file?.path ?? '',
+        image: req.file.path,
         score: parseFloat(score),
         synopsis,
         genres: {
-          connect: genresIDs.map((genreId: string) => ({ id: genreId })),
+          connect: genres,
         },
         user: { connect: { id: userId } },
       },
     })
-    res.status(201).send(newMovie)
+
+    try {
+      const uploadedMovie = await renameAndUpdateMovieImage(newMovie.id, req.file.filename);
+      res.status(201).send(uploadedMovie);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+    
   } catch (error) {
     res.status(400).send(`There was an error creating the movie. See more details: ${error}`)
   }
