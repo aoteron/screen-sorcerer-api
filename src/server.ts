@@ -3,6 +3,7 @@ import userRouter from './routes/user.routes'
 import movieRoutes from './routes/movie.routes'
 import genreRoutes from './routes/genre.routes'
 import cors from 'cors'
+import cloudinary from './config/cloudinaryConfig'
 
 const app = express()
 app.use(cors())

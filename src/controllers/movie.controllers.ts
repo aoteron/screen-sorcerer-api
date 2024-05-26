@@ -11,10 +11,13 @@ export const getAllMovies = async (req: Request, res: Response) => {
 }
 
 export const createMovie = async (req: Request, res: Response) => {
-  const { name, image, score, synopsis, genresIDs } = req.body
+  console.log('Request body:', req.body); //Debugging
+  console.log('Request file:', req.file); //Debugging
+
+  const { name, score, synopsis, genresIDs } = req.body
   const { userId } = req.params
 
-  if (!name || !image || !score) {
+  if (!name || !req.file || !score) {
     return res.status(400).send(`Sorry, missing fields. Please add a name, image and score`)
   }
 
@@ -26,8 +29,8 @@ export const createMovie = async (req: Request, res: Response) => {
     const newMovie = await prisma.movie.create({
       data: {
         name,
-        image,
-        score,
+        image: req.file?.path ?? '',
+        score: parseFloat(score),
         synopsis,
         genres: {
           connect: genresIDs.map((genreId: string) => ({ id: genreId })),

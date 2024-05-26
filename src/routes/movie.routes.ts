@@ -5,11 +5,12 @@ import {
   getAllMovies,
   updateMovie,
 } from '../controllers/movie.controllers'
+import multerUploads from '../utils/multerConfig'
 
 const movieRoutes = Router()
 
 movieRoutes.get('/', getAllMovies)
-movieRoutes.post('/:userId', createMovie)
+movieRoutes.post('/:userId', multerUploads.single('image'), createMovie)
 movieRoutes.patch('/:movieId', updateMovie)
 movieRoutes.delete('/:movieId', deleteMovie)
 
